@@ -2,8 +2,8 @@
 
 // component containing user's account data, with option to edit
 
-import React, { Component } from "react";
-import withStyles from "@material-ui/core/styles/withStyles";
+import React, { Component } from 'react';
+import withStyles from '@material-ui/core/styles/withStyles';
 import {
   Button,
   Card,
@@ -19,11 +19,11 @@ import {
   InputLabel,
   Select,
   TextField,
-} from "@material-ui/core";
-import CloudUploadIcon from "@material-ui/icons/CloudUpload";
+} from '@material-ui/core';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 
-import axios from "axios";
-import { authMiddleWare } from "../util/auth";
+import axios from 'axios';
+import { authMiddleWare } from '../util/auth';
 
 const styles = (theme) => ({
   content: {
@@ -33,37 +33,37 @@ const styles = (theme) => ({
   toolbar: theme.mixins.toolbar,
   root: {},
   details: {
-    display: "flex",
+    display: 'flex',
   },
   locationText: {
-    paddingLeft: "15px",
+    paddingLeft: '15px',
   },
   buttonProperty: {
-    position: "absolute",
-    top: "50%",
+    position: 'absolute',
+    top: '50%',
   },
   uiProgess: {
-    position: "fixed",
-    zIndex: "1000",
-    height: "31px",
-    width: "31px",
-    left: "50%",
-    top: "35%",
+    position: 'fixed',
+    zIndex: '1000',
+    height: '31px',
+    width: '31px',
+    left: '50%',
+    top: '35%',
   },
   progess: {
-    position: "absolute",
+    position: 'absolute',
   },
   uploadButton: {
-    marginLeft: "8px",
+    marginLeft: '8px',
     margin: theme.spacing(1),
   },
   customError: {
-    color: "red",
-    fontSize: "0.8rem",
+    color: 'red',
+    fontSize: '0.8rem',
     marginTop: 10,
   },
   submitButton: {
-    marginTop: "10px",
+    marginTop: '10px',
   },
 });
 
@@ -72,31 +72,33 @@ class account extends Component {
     super(props);
 
     this.state = {
-      firstName: "",
-      lastName: "",
-      email: "",
-      phoneNumber: "",
-      netid: "",
-      classification: "",
-      major: "",
-      otherMajor: "",
+      firstName: '',
+      lastName: '',
+      email: '',
+      phoneNumber: '',
+      netid: '',
+      classification: '',
+      major: '',
+      otherMajor: '',
       uiLoading: true,
       buttonLoading: false,
-      imageError: "",
+      imageError: '',
       showAlum: false,
-      alumDesc: "",
+      alumDesc: '',
+      race: '',
+      lgbt: false,
+      disability: false,
     };
   }
 
   // makes sure user is logged in
   componentWillMount = () => {
     authMiddleWare(this.props.history);
-    const authToken = localStorage.getItem("AuthToken");
+    const authToken = localStorage.getItem('AuthToken');
     axios.defaults.headers.common = { Authorization: `${authToken}` };
     axios
-      .get("https://us-central1-swe-utd-portal.cloudfunctions.net/api/member")
+      .get('https://us-central1-swe-utd-portal.cloudfunctions.net/api/member')
       .then((response) => {
-        console.log(response.data);
         this.setState({
           firstName: response.data.memberInfo.firstName,
           lastName: response.data.memberInfo.lastName,
@@ -107,16 +109,19 @@ class account extends Component {
           otherMajor: response.data.memberInfo.otherMajor,
           netid: response.data.memberInfo.netid,
           showAlum: response.data.memberInfo.showAlum || false,
-          alumDesc: response.data.memberInfo.alumDesc || "",
+          alumDesc: response.data.memberInfo.alumDesc || '',
           uiLoading: false,
+          race: response.data.memberInfo.race || 'N/A',
+          lgbt: response.data.memberInfo.lgbt || false,
+          disability: response.data.disability || false,
         });
       })
       .catch((error) => {
         if (error.response.status === 403) {
-          this.props.history.push("/login");
+          this.props.history.push('/login');
         }
         console.log(error);
-        this.setState({ errorMsg: "Error in retrieving the data" });
+        this.setState({ errorMsg: 'Error in retrieving the data' });
       });
   };
 
@@ -132,9 +137,9 @@ class account extends Component {
     event.preventDefault();
     this.setState({ buttonLoading: true });
     authMiddleWare(this.props.history);
-    const authToken = localStorage.getItem("AuthToken");
+    const authToken = localStorage.getItem('AuthToken');
     axios.defaults.headers.common = { Authorization: `${authToken}` };
-    if (this.state.major !== "Other") this.state.otherMajor = "";
+    if (this.state.major !== 'Other') this.state.otherMajor = '';
     const formRequest = {
       firstName: this.state.firstName,
       lastName: this.state.lastName,
@@ -144,11 +149,14 @@ class account extends Component {
       phoneNumber: this.state.phoneNumber,
       showAlum: this.state.showAlum,
       alumDesc: this.state.alumDesc,
+      race: this.state.race,
+      lgbt: this.state.lgbt,
+      disability: this.state.disability,
     };
 
     axios
       .post(
-        "https://us-central1-swe-utd-portal.cloudfunctions.net/api/member",
+        'https://us-central1-swe-utd-portal.cloudfunctions.net/api/member',
         formRequest
       )
       .then(() => {
@@ -156,7 +164,7 @@ class account extends Component {
       })
       .catch((error) => {
         if (error.response.status === 403) {
-          this.props.history.push("/login");
+          this.props.history.push('/login');
         }
         console.log(error);
         this.setState({
@@ -215,8 +223,8 @@ class account extends Component {
                     type="submit"
                     startIcon={<CloudUploadIcon />}
                     onClick={() => {
-                      const url = "https://forms.gle/62h6cNTnVyJ8JhVbA";
-                      window.open(url, "_blank");
+                      const url = 'https://forms.gle/62h6cNTnVyJ8JhVbA';
+                      window.open(url, '_blank');
                     }}
                   >
                     Upload
@@ -358,7 +366,60 @@ class account extends Component {
                       onChange={this.handleChange}
                     />
                   </Grid>
-                  <Grid item md={6} xs={12}>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth variant="outlined" margin="dense">
+                      <InputLabel>Race/Ethnicity</InputLabel>
+                      <Select
+                        label="Race"
+                        name="race"
+                        value={this.state.race}
+                        onChange={this.handleChange}
+                      >
+                        <MenuItem selected value="N/A">
+                          I do not wish to provide this information
+                        </MenuItem>
+                        <MenuItem value="AmericanIndian">
+                          American Indian or Alaska Native
+                        </MenuItem>
+                        <MenuItem value="Asian">Asian</MenuItem>
+                        <MenuItem value="Black">
+                          Black or African American
+                        </MenuItem>
+                        <MenuItem value="Hispanic">Hispanic or Latino</MenuItem>
+                        <MenuItem value="NativeHawaiian">
+                          Native Hawaiian or Other Pacific Islander
+                        </MenuItem>
+                        <MenuItem value="White">White</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item md={3} xs={12}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={this.state.lgbt}
+                          onChange={this.handleChange}
+                          name="lgbt"
+                          color="primary"
+                        />
+                      }
+                      label="I identify as LGBT+"
+                    />
+                  </Grid>
+                  <Grid item md={3} xs={12}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={this.state.disability}
+                          onChange={this.handleChange}
+                          name="disability"
+                          color="primary"
+                        />
+                      }
+                      label="I have a disability"
+                    />
+                  </Grid>
+                  <Grid item md={3} xs={12}>
                     <FormControlLabel
                       control={
                         <Switch

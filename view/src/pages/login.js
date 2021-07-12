@@ -2,9 +2,9 @@
 
 // Handles user login to portal
 
-import React, { Component } from "react";
-import withStyles from "@material-ui/core/styles/withStyles";
-import classNames from "classnames";
+import React, { Component } from 'react';
+import withStyles from '@material-ui/core/styles/withStyles';
+import classNames from 'classnames';
 import {
   Button,
   Grid,
@@ -14,17 +14,19 @@ import {
   Divider,
   FormControl,
   InputLabel,
+  FormControlLabel,
+  Switch,
   MenuItem,
   Select,
   TextField,
   Typography,
-} from "@material-ui/core";
+} from '@material-ui/core';
 
-import NavBar from "../components/navbar";
-import Footer from "../components/footer";
-import { auth } from "../components/firebase";
+import NavBar from '../components/navbar';
+import Footer from '../components/footer';
+import { auth } from '../components/firebase';
 
-import axios from "axios";
+import axios from 'axios';
 
 const styles = (theme) => ({
   content: {
@@ -33,9 +35,9 @@ const styles = (theme) => ({
   },
   paper: {
     marginTop: theme.spacing(8),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
   },
   login: {
     margin: theme.spacing(3, 0, 2),
@@ -44,12 +46,12 @@ const styles = (theme) => ({
     margin: theme.spacing(3, 0, 2),
   },
   customError: {
-    color: "red",
-    fontSize: "0.8rem",
+    color: 'red',
+    fontSize: '0.8rem',
     marginTop: 10,
   },
   progess: {
-    position: "absolute",
+    position: 'absolute',
   },
 });
 
@@ -60,29 +62,32 @@ class login extends Component {
     this.state = { headerReady: false };
 
     this.state = {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
       errors: [],
       loginLoading: false,
     };
 
     this.state = {
-      firstName: "",
-      lastName: "",
-      phoneNumber: "",
-      classification: "",
-      major: "",
-      netid: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
+      firstName: '',
+      lastName: '',
+      phoneNumber: '',
+      classification: '',
+      major: '',
+      netid: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
       resume: null,
+      race: '',
+      lgbt: false,
+      disability: false,
       errors: [],
       signupLoading: false,
     };
 
     this.state = {
-      email: "",
+      email: '',
       message: null,
     };
   }
@@ -109,7 +114,7 @@ class login extends Component {
       .then(() => {
         this.setState({
           message:
-            "Check your email for a reset password link. You might need to check spam/junk.",
+            'Check your email for a reset password link. You might need to check spam/junk.',
         });
       })
       .catch((err) =>
@@ -134,15 +139,15 @@ class login extends Component {
     };
     axios
       .post(
-        "https://us-central1-swe-utd-portal.cloudfunctions.net/api/login",
+        'https://us-central1-swe-utd-portal.cloudfunctions.net/api/login',
         memberData
       )
       .then((response) => {
-        localStorage.setItem("AuthToken", `Bearer ${response.data.token}`);
+        localStorage.setItem('AuthToken', `Bearer ${response.data.token}`);
         this.setState({
           loginLoading: false,
         });
-        this.props.history.push("/portal");
+        this.props.history.push('/portal');
       })
       .catch((error) => {
         this.setState({
@@ -155,7 +160,7 @@ class login extends Component {
   handleSignup = (event) => {
     event.preventDefault();
     this.setState({ signupLoading: true });
-    if (this.state.major != "Other") this.state.otherMajor = "";
+    if (this.state.major != 'Other') this.state.otherMajor = '';
     const newMemberData = {
       firstName: this.state.firstName,
       lastName: this.state.lastName,
@@ -167,18 +172,21 @@ class login extends Component {
       email: this.state.email.toLowerCase(),
       password: this.state.password,
       confirmPassword: this.state.confirmPassword,
+      race: this.state.race,
+      lgbt: this.state.lgbt,
+      disability: this.state.disability,
     };
     axios
       .post(
-        "https://us-central1-swe-utd-portal.cloudfunctions.net/api/signup",
+        'https://us-central1-swe-utd-portal.cloudfunctions.net/api/signup',
         newMemberData
       )
       .then((response) => {
-        localStorage.setItem("AuthToken", `Bearer ${response.data.token}`);
+        localStorage.setItem('AuthToken', `Bearer ${response.data.token}`);
         this.setState({
           signupLoading: false,
         });
-        this.props.history.push("/portal");
+        this.props.history.push('/portal');
         // if SWE account not made copy code here
         if (this.state.resume != null) {
           this.handleResumeUpload();
@@ -197,7 +205,7 @@ class login extends Component {
     console.log(this.state.resume);
     // Setting the 'image' field and the selected file
     fileData.set(
-      "file",
+      'file',
       this.state.resume,
       `${this.state.resume.lastModified}-${this.state.resume.name}`
     );
@@ -205,11 +213,11 @@ class login extends Component {
     console.log(fileData);
     axios
       .post(
-        "https://us-central1-swe-utd-portal.cloudfunctions.net/upload",
+        'https://us-central1-swe-utd-portal.cloudfunctions.net/upload',
         fileData
       )
       .then((response) => {
-        console.log("Resume Uploaded");
+        console.log('Resume Uploaded');
       })
       .catch((error) => {
         this.setState({
@@ -232,7 +240,7 @@ class login extends Component {
     return (
       <div>
         <NavBar />
-        <div className={classNames("header", { ready: headerReady })}>
+        <div className={classNames('header', { ready: headerReady })}>
           <p className="heading">Access the Portal to View Your SWE Points</p>
         </div>
         <Container width="75%">
@@ -314,7 +322,7 @@ class login extends Component {
                 <Typography
                   component="h1"
                   variant="h5"
-                  style={{ marginTop: "20px" }}
+                  style={{ marginTop: '20px' }}
                 >
                   Forgot Password?
                 </Typography>
@@ -530,6 +538,61 @@ class login extends Component {
                         id="confirmPassword"
                         autoComplete="current-password"
                         onChange={this.handleChange}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <FormControl fullWidth variant="outlined" margin="dense">
+                        <InputLabel>Race/Ethnicity</InputLabel>
+                        <Select
+                          label="Race"
+                          name="race"
+                          value={this.state.race}
+                          onChange={this.handleChange}
+                        >
+                          <MenuItem selected value="N/A">
+                            I do not wish to provide this information
+                          </MenuItem>
+                          <MenuItem value="AmericanIndian">
+                            American Indian or Alaska Native
+                          </MenuItem>
+                          <MenuItem value="Asian">Asian</MenuItem>
+                          <MenuItem value="Black">
+                            Black or African American
+                          </MenuItem>
+                          <MenuItem value="Hispanic">
+                            Hispanic or Latino
+                          </MenuItem>
+                          <MenuItem value="NativeHawaiian">
+                            Native Hawaiian or Other Pacific Islander
+                          </MenuItem>
+                          <MenuItem value="White">White</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={this.state.lgbt}
+                            onChange={this.handleChange}
+                            name="lgbt"
+                            color="primary"
+                          />
+                        }
+                        label="I identify as LGBT+"
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={this.state.disability}
+                            onChange={this.handleChange}
+                            name="disability"
+                            color="primary"
+                          />
+                        }
+                        label="I have a disability"
                       />
                     </Grid>
                     {/* <Grid item xs={12}>
